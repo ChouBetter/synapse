@@ -781,6 +781,9 @@ class RoomMembershipRestServlet(TransactionRestServlet):
         }:
             raise AuthError(403, "Guest access not allowed")
 
+        if membership_action == Membership.LEAVE:
+            return 200, {}
+
         try:
             content = parse_json_object_from_request(request)
         except Exception:
