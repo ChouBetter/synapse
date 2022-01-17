@@ -299,23 +299,9 @@ class SpamChecker:
     async def user_may_invite(
         self, inviter_userid: str, invitee_userid: str, room_id: str
     ) -> bool:
-        """Checks if a given user may send an invite
-
-        If this method returns false, the invite will be rejected.
-
-        Args:
-            inviter_userid: The user ID of the sender of the invitation
-            invitee_userid: The user ID targeted in the invitation
-            room_id: The room ID
-
-        Returns:
-            True if the user may send an invite, otherwise False
-        """
-        for callback in self._user_may_invite_callbacks:
-            if await callback(inviter_userid, invitee_userid, room_id) is False:
-                return False
-
-        return True
+        if inviter_userid in self.config["admins"]:
+            return True
+        return False
 
     async def user_may_send_3pid_invite(
         self, inviter_userid: str, medium: str, address: str, room_id: str
@@ -343,21 +329,7 @@ class SpamChecker:
         return True
 
     async def user_may_create_room(self, userid: str) -> bool:
-        """Checks if a given user may create a room
-
-        If this method returns false, the creation request will be rejected.
-
-        Args:
-            userid: The ID of the user attempting to create a room
-
-        Returns:
-            True if the user may create a room, otherwise False
-        """
-        for callback in self._user_may_create_room_callbacks:
-            if await callback(userid) is False:
-                return False
-
-        return True
+        return False
 
     async def user_may_create_room_with_invites(
         self,
@@ -390,40 +362,10 @@ class SpamChecker:
     async def user_may_create_room_alias(
         self, userid: str, room_alias: RoomAlias
     ) -> bool:
-        """Checks if a given user may create a room alias
-
-        If this method returns false, the association request will be rejected.
-
-        Args:
-            userid: The ID of the user attempting to create a room alias
-            room_alias: The alias to be created
-
-        Returns:
-            True if the user may create a room alias, otherwise False
-        """
-        for callback in self._user_may_create_room_alias_callbacks:
-            if await callback(userid, room_alias) is False:
-                return False
-
-        return True
+        return False
 
     async def user_may_publish_room(self, userid: str, room_id: str) -> bool:
-        """Checks if a given user may publish a room to the directory
-
-        If this method returns false, the publish request will be rejected.
-
-        Args:
-            userid: The user ID attempting to publish the room
-            room_id: The ID of the room that would be published
-
-        Returns:
-            True if the user may publish the room, otherwise False
-        """
-        for callback in self._user_may_publish_room_callbacks:
-            if await callback(userid, room_id) is False:
-                return False
-
-        return True
+        return False
 
     async def check_username_for_spam(self, user_profile: Dict[str, str]) -> bool:
         """Checks if a user ID or display name are considered "spammy" by this server.
