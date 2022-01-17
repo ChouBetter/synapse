@@ -677,14 +677,7 @@ class RoomCreationHandler:
         invite_3pid_list = config.get("invite_3pid", [])
         invite_list = config.get("invite", [])
 
-        if not is_requester_admin and not (
-            await self.spam_checker.user_may_create_room(user_id)
-            and await self.spam_checker.user_may_create_room_with_invites(
-                user_id,
-                invite_list,
-                invite_3pid_list,
-            )
-        ):
+        if not is_requester_admin:
             raise SynapseError(403, "You are not permitted to create rooms")
 
         if ratelimit:
