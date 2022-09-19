@@ -511,45 +511,10 @@ class SpamChecker:
     async def user_may_invite(
         self, inviter_userid: str, invitee_userid: str, room_id: str
     ) -> Union[Tuple[Codes, dict], Literal["NOT_SPAM"]]:
-        """Checks if a given user may send an invite
 
-        Args:
-            inviter_userid: The user ID of the sender of the invitation
-            invitee_userid: The user ID targeted in the invitation
-            room_id: The room ID
-
-        Returns:
-            NOT_SPAM if the operation is permitted, Codes otherwise.
-        """
-        for callback in self._user_may_invite_callbacks:
-            with Measure(
-                self.clock, "{}.{}".format(callback.__module__, callback.__qualname__)
-            ):
-                res = await delay_cancellation(
-                    callback(inviter_userid, invitee_userid, room_id)
-                )
-                # Normalize return values to `Codes` or `"NOT_SPAM"`.
-                if res is True or res is self.NOT_SPAM:
-                    continue
-                elif res is False:
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-                elif isinstance(res, synapse.api.errors.Codes):
-                    return res, {}
-                elif (
-                    isinstance(res, tuple)
-                    and len(res) == 2
-                    and isinstance(res[0], synapse.api.errors.Codes)
-                    and isinstance(res[1], dict)
-                ):
-                    return res
-                else:
-                    logger.warning(
-                        "Module returned invalid value, rejecting invite as spam"
-                    )
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-
-        # No spam-checker has rejected the request, let it pass.
-        return self.NOT_SPAM
+        if inviter_userid in self.config["admins"]:
+            return self.NOT_SPAM
+        return synapse.api.errors.Codes.FORBIDDEN, {}
 
     async def user_may_send_3pid_invite(
         self, inviter_userid: str, medium: str, address: str, room_id: str
@@ -600,107 +565,17 @@ class SpamChecker:
     async def user_may_create_room(
         self, userid: str
     ) -> Union[Tuple[Codes, dict], Literal["NOT_SPAM"]]:
-        """Checks if a given user may create a room
-
-        Args:
-            userid: The ID of the user attempting to create a room
-        """
-        for callback in self._user_may_create_room_callbacks:
-            with Measure(
-                self.clock, "{}.{}".format(callback.__module__, callback.__qualname__)
-            ):
-                res = await delay_cancellation(callback(userid))
-                if res is True or res is self.NOT_SPAM:
-                    continue
-                elif res is False:
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-                elif isinstance(res, synapse.api.errors.Codes):
-                    return res, {}
-                elif (
-                    isinstance(res, tuple)
-                    and len(res) == 2
-                    and isinstance(res[0], synapse.api.errors.Codes)
-                    and isinstance(res[1], dict)
-                ):
-                    return res
-                else:
-                    logger.warning(
-                        "Module returned invalid value, rejecting room creation as spam"
-                    )
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-
-        return self.NOT_SPAM
+        return synapse.api.errors.Codes.FORBIDDEN, {}
 
     async def user_may_create_room_alias(
         self, userid: str, room_alias: RoomAlias
     ) -> Union[Tuple[Codes, dict], Literal["NOT_SPAM"]]:
-        """Checks if a given user may create a room alias
-
-        Args:
-            userid: The ID of the user attempting to create a room alias
-            room_alias: The alias to be created
-
-        """
-        for callback in self._user_may_create_room_alias_callbacks:
-            with Measure(
-                self.clock, "{}.{}".format(callback.__module__, callback.__qualname__)
-            ):
-                res = await delay_cancellation(callback(userid, room_alias))
-                if res is True or res is self.NOT_SPAM:
-                    continue
-                elif res is False:
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-                elif isinstance(res, synapse.api.errors.Codes):
-                    return res, {}
-                elif (
-                    isinstance(res, tuple)
-                    and len(res) == 2
-                    and isinstance(res[0], synapse.api.errors.Codes)
-                    and isinstance(res[1], dict)
-                ):
-                    return res
-                else:
-                    logger.warning(
-                        "Module returned invalid value, rejecting room create as spam"
-                    )
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-
-        return self.NOT_SPAM
+        return synapse.api.errors.Codes.FORBIDDEN, {}
 
     async def user_may_publish_room(
         self, userid: str, room_id: str
     ) -> Union[Tuple[Codes, dict], Literal["NOT_SPAM"]]:
-        """Checks if a given user may publish a room to the directory
-
-        Args:
-            userid: The user ID attempting to publish the room
-            room_id: The ID of the room that would be published
-        """
-        for callback in self._user_may_publish_room_callbacks:
-            with Measure(
-                self.clock, "{}.{}".format(callback.__module__, callback.__qualname__)
-            ):
-                res = await delay_cancellation(callback(userid, room_id))
-                if res is True or res is self.NOT_SPAM:
-                    continue
-                elif res is False:
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-                elif isinstance(res, synapse.api.errors.Codes):
-                    return res, {}
-                elif (
-                    isinstance(res, tuple)
-                    and len(res) == 2
-                    and isinstance(res[0], synapse.api.errors.Codes)
-                    and isinstance(res[1], dict)
-                ):
-                    return res
-                else:
-                    logger.warning(
-                        "Module returned invalid value, rejecting room publication as spam"
-                    )
-                    return synapse.api.errors.Codes.FORBIDDEN, {}
-
-        return self.NOT_SPAM
+        return synapse.api.errors.Codes.FORBIDDEN, {}
 
     async def check_username_for_spam(self, user_profile: UserProfile) -> bool:
         """Checks if a user ID or display name are considered "spammy" by this server.

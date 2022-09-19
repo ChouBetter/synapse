@@ -862,6 +862,9 @@ class RoomCreationHandler:
         if not allowed_by_third_party_rules:
             raise SynapseError(403, "Room visibility value not allowed.")
 
+        if not is_requester_admin:
+            raise SynapseError(403, "Not allowed to publish room")
+
         if is_public:
             room_aliases = []
             if room_alias:
